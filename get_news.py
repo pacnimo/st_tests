@@ -10,7 +10,7 @@ with st.form(key="stock_form"):
     stock_symbol = st.text_input("Enter Stock Symbol", value=default_symbol)
     submit_button = st.form_submit_button(label="Fetch News")
 
-# Fetch stock data only when the form is submitted
+# Fetch stock data and news only when the form is submitted
 if submit_button:
     try:
         # Fetch stock data using yfinance
@@ -20,9 +20,13 @@ if submit_button:
         st.write(f"**Stock Info for {stock_symbol.upper()}**")
         st.write(stock.info)
 
-        # Dummy example for stock news as yfinance does not support news fetching directly
-        st.write(f"\n**Latest news for {stock_symbol.upper()} (Demo)**")
-        st.write("- News 1: Example news headline")
-        st.write("- News 2: Example news headline")
+        # Fetch and display news
+        news_data = stock.news
+        if news_data:
+            st.write(f"**Latest news for {stock_symbol.upper()}**")
+            for news in news_data:
+                st.write(f"- [{news['title']}]({news['link']}) - {news['publisher']}")
+        else:
+            st.write(f"No recent news available for {stock_symbol.upper()}.")
     except Exception as e:
         st.error(f"Unable to fetch data for {stock_symbol.upper()}: {e}")
