@@ -1,44 +1,28 @@
 import streamlit as st
 import yfinance as yf
 
-# Set page configuration with page title, layout, and initial sidebar state
-st.set_page_config(
-    page_title="Apple Stock News Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={'About': "Apple Stock News Dashboard..."}
-)
+# Default stock symbol
+default_symbol = "TSLA"
 
-st.title('Apple Stock News Dashboard')
+# Streamlit form to input a stock symbol
+st.title("Yahoo Finance Stock News")
+with st.form(key="stock_form"):
+    stock_symbol = st.text_input("Enter Stock Symbol", value=default_symbol)
+    submit_button = st.form_submit_button(label="Fetch News")
 
-# Display Apple Stock News
-def display_apple_stock_news():
-    ticker = "AAPL"
-    stock = yf.Ticker(ticker)
-
+# Fetch stock data only when the form is submitted
+if submit_button:
     try:
-        # Retrieve news related to Apple
-        stock_news = stock.news
+        # Fetch stock data using yfinance
+        stock = yf.Ticker(stock_symbol)
+        
+        # Display basic info about the stock
+        st.write(f"**Stock Info for {stock_symbol.upper()}**")
+        st.write(stock.info)
 
-        # Check if the news list is empty
-        if not stock_news:
-            st.warning("No news available for Apple.")
-            return
-
-        # Display each news item in the Streamlit app
-        for news in stock_news:
-            st.subheader(news.get('title', 'No title available'))  # Get the news headline
-            st.write("Publisher:", news.get('publisher', 'No publisher available'))  # Get the news publisher
-            st.write("Link:", news.get('link', 'No link available'))  # Provide the link to the full news
-            date = news.get('providerPublishTime', None)
-            if date:
-                from datetime import datetime
-                date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-            st.write("Date:", date if date else 'No date available')
-            st.markdown("-------------------------------------------------------")
+        # Dummy example for stock news as yfinance does not support news fetching directly
+        st.write(f"\n**Latest news for {stock_symbol.upper()} (Demo)**")
+        st.write("- News 1: Example news headline")
+        st.write("- News 2: Example news headline")
     except Exception as e:
-        st.error(f"Failed to load Apple stock news: {e}")
-
-# Call the function to display Apple stock news
-display_apple_stock_news()
-
+        st.error(f"Unable to fetch data for {stock_symbol.upper()}: {e}")
