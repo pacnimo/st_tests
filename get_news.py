@@ -1,29 +1,45 @@
 import streamlit as st
 import yfinance as yf
 
-# Default stock symbol
-default_symbol = "MSFT"
+# Set up Streamlit page configuration
+st.set_page_config(
+    page_title="Stock News Dashboard",
+    layout="wide"
+)
 
-# Streamlit form to input a stock symbol
-st.title("Yahoo Finance Stock News")
-with st.form(key="stock_form"):
-    stock_symbol = st.text_input("Enter Stock Symbol", value=default_symbol)
-    submit_button = st.form_submit_button(label="Fetch News")
+st.title('Stock News Dashboard')
 
-# Fetch stock data and news only when the form is submitted
-if submit_button:
-    stock = yf.Ticker(stock_symbol)
-
+# Function to display news for the specified stock ticker
+def display_stock_news(ticker):
+    stock = yf.Ticker(ticker)
+    
     try:
-        # Attempt to fetch news
-        news_data = stock.news
-        if news_data:
-            st.write(f"**Latest news for {stock_symbol.upper()}**")
-            for news in news_data:
-                st.write(f"- [{news['title']}]({news['link']}) - Published by {news['publisher']}")
-        else:
-            st.write(f"No recent news available for {stock_symbol.upper()}.")
-    except ValueError as e:
-        st.error(f"Error processing JSON data: {e}")
+        # Retrieve news related to the stock
+        stock_news = stock.news
+        
+        # Check if news is available
+        if not stock_news:
+            st.warning(f"No news available for {ticker}.")
+            return
+        
+        # Display each news item
+        st.subheader(f"Latest News for {ticker}")
+        for news in stock_news:
+            st.write(f"**{news.get('title', 'No title available')}**")
+            st.write(f"Publisher: {news.get('publisher', 'No publisher available')}")
+            st.write(f"[Read More]({news.get('link', '#')})")
+            date = news.get('providerPublishTime', None)
+            if date:
+                from datetime import datetime
+                date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
+            st.write(f"Date: {date if date else 'No date available'}")
+            st.markdown("---")
     except Exception as e:
-        st.error(f"Unexpected error: {e}")
+        st.error(f"Failed to load stock news: {e}")
+
+# Input field to provide the stock ticker
+ticker = st.text_input('Enter Stock Ticker', 'AAPL')
+
+# Fetch and display the news for the specified ticker
+if ticker:
+    display_stock_news(ticker)
